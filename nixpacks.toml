@@ -1,0 +1,10 @@
+# Nixpacks configuration for Railway
+[phases.build]
+cmds = ["./mvnw clean package -DskipTests"]
+
+[phases.start]
+cmd = "java -Dserver.port=$PORT -jar target/qoder-v3-0.0.1-SNAPSHOT.jar"
+
+[variables]
+MAVEN_OPTS = "-Xmx1024m"
+JAVA_TOOL_OPTIONS = "-Xmx512m -XX:+UseContainerSupport"

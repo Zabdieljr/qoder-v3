@@ -1,6 +1,14 @@
-# Minimal Railway configuration
+# Railway configuration for Java 21
+[providers]
+java = "21"
+
 [phases.setup]
 cmds = ["chmod +x mvnw"]
+
+[variables]
+JAVA_VERSION = "21"
+MAVEN_OPTS = "-Xmx1024m"
+JAVA_TOOL_OPTIONS = "-Xmx512m -XX:+UseContainerSupport"
 
 [phases.build]
 cmds = ["./mvnw clean package -DskipTests -q"]

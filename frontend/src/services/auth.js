@@ -1,5 +1,7 @@
 import { supabase, TABLES, USER_STATUS } from './supabase.js'
 
+import { supabase, TABLES, USER_STATUS } from './supabase.js'
+
 export class AuthService {
   // User Registration
   async signUp(email, password, userData) {

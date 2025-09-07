@@ -19,7 +19,8 @@ import {
   Loader2
 } from 'lucide-react'
 import { useAuth } from '../contexts/AuthContext.jsx'
-import { authService, USER_STATUS } from '../services/auth.js'
+import { authService } from '../services/auth.js'
+import { USER_STATUS } from '../services/supabase.js'
 
 // Status Badge Component
 const StatusBadge = ({ status }) => {

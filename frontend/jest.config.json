@@ -13,6 +13,9 @@
     "^@/(.*)$": "<rootDir>/src/$1",
     "\\.(css|less|scss|sass)$": "identity-obj-proxy"
   },
+  "transformIgnorePatterns": [
+    "node_modules/(?!(.*\\.mjs$|@supabase|lucide-react))"
+  ],
   "collectCoverageFrom": [
     "src/**/*.{js,jsx}",
     "!src/main.jsx",

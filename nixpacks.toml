@@ -1,6 +1,8 @@
-# Minimal Railway configuration
+[providers]
+java = true
+
 [phases.setup]
 cmds = ["chmod +x mvnw"]
 
 [variables]
-JAVA_VERSION = "21"
+JAVA_VERSION = "17"

@@ -1,10 +1,13 @@
-# Nixpacks configuration for Railway
+# Minimal Railway configuration
+[phases.setup]
+cmds = ["chmod +x mvnw"]
+
 [phases.build]
-cmds = ["./mvnw clean package -DskipTests"]
+cmds = ["./mvnw clean package -DskipTests -q"]
 
 [phases.start]
-cmd = "java -Dserver.port=$PORT -jar target/qoder-v3-0.0.1-SNAPSHOT.jar"
+cmd = "java -Dserver.port=$PORT -Dspring.profiles.active=production -jar target/qoder-v3-0.0.1-SNAPSHOT.jar"
 
 [variables]
-MAVEN_OPTS = "-Xmx1024m"
+MAVEN_OPTS = "-Dorg.slf4j.simpleLogger.log.org.apache.maven.cli.transfer.Slf4jMavenTransferListener=warn"
 JAVA_TOOL_OPTIONS = "-Xmx512m -XX:+UseContainerSupport"

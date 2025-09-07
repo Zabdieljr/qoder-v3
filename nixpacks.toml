@@ -1,5 +1,4 @@
-[providers]
-java = true
+providers = ["java"]
 
 [phases.setup]
 cmds = ["chmod +x mvnw"]

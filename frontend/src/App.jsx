@@ -10,11 +10,20 @@ import './index.css'
 // Temporary flag to show database test
 const SHOW_DB_TEST = false
 
+// Temporary flag to disable admin setup check (for debugging)
+const SKIP_ADMIN_CHECK = true // Set to false when admin check is working
+
 // App wrapper that handles admin setup
 const AppWrapper = () => {
   const { setupNeeded, checking } = useAdminSetup()
   const [setupComplete, setSetupComplete] = useState(false)
   const [forceSkipCheck, setForceSkipCheck] = useState(false)
+
+  // If we're skipping admin check, go straight to main app
+  if (SKIP_ADMIN_CHECK) {
+    console.log('Admin check disabled, loading main app directly')
+    return <RouterProvider router={router} />
+  }
 
   // Emergency bypass: if stuck on loading for too long, show skip option
   useEffect(() => {
@@ -22,7 +31,7 @@ const AppWrapper = () => {
       const emergencyTimer = setTimeout(() => {
         console.warn('App initialization taking too long, enabling skip option')
         setForceSkipCheck(true)
-      }, 15000) // 15 seconds
+      }, 8000) // Reduced to 8 seconds
       
       return () => clearTimeout(emergencyTimer)
     }

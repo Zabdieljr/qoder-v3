@@ -1,6 +1,7 @@
 import React from 'react'
 import { createBrowserRouter, Navigate, useNavigate } from 'react-router-dom'
 import { PublicRoute, PrivateRoute, AdminRoute } from '../components/RouteGuards.jsx'
+import { useAuth } from '../contexts/AuthContext.jsx'
 
 // Import pages
 import { LoginPage } from '../pages/LoginPage.jsx'
@@ -58,45 +59,146 @@ const ResetPassword = () => (
   </div>
 )
 
-// Simple test component to verify routing works
-const TestComponent = () => {
+// Login page wrapper with auth check
+const LoginPageWrapper = () => {
+  const { isAuthenticated, loading } = useAuth()
   const navigate = useNavigate()
   
-  return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50">
-      <div className="text-center">
-        <h1 className="text-3xl font-bold text-gray-900 mb-4">🎉 App is Working!</h1>
-        <p className="text-gray-600 mb-6">Routing is functional. Let's test login:</p>
-        <button
-          onClick={() => navigate('/login')}
-          className="bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 inline-block mr-4"
-        >
-          Go to Login
-        </button>
-        <button
-          onClick={() => navigate('/register')}
-          className="bg-green-600 text-white px-6 py-3 rounded-lg hover:bg-green-700 inline-block"
-        >
-          Go to Register
-        </button>
+  // Show loading while checking auth status
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gray-50">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary-600 mx-auto mb-4"></div>
+          <p className="text-gray-600">Loading...</p>
+        </div>
       </div>
-    </div>
-  )
+    )
+  }
+  
+  // Redirect to dashboard if already authenticated
+  if (isAuthenticated) {
+    navigate('/dashboard', { replace: true })
+    return null
+  }
+  
+  return <LoginPage />
+}
+
+// Register page wrapper with auth check
+const RegisterPageWrapper = () => {
+  const { isAuthenticated, loading } = useAuth()
+  const navigate = useNavigate()
+  
+  // Show loading while checking auth status
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gray-50">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary-600 mx-auto mb-4"></div>
+          <p className="text-gray-600">Loading...</p>
+        </div>
+      </div>
+    )
+  }
+  
+  // Redirect to dashboard if already authenticated
+  if (isAuthenticated) {
+    navigate('/dashboard', { replace: true })
+    return null
+  }
+  
+  return <RegisterPage />
+}
+
+// Dashboard wrapper with auth check
+const DashboardWrapper = () => {
+  const { isAuthenticated, loading } = useAuth()
+  const navigate = useNavigate()
+  
+  // Show loading while checking auth status
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gray-50">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary-600 mx-auto mb-4"></div>
+          <p className="text-gray-600">Loading...</p>
+        </div>
+      </div>
+    )
+  }
+  
+  // Redirect to login if not authenticated
+  if (!isAuthenticated) {
+    navigate('/login', { replace: true })
+    return null
+  }
+  
+  return <Dashboard />
+}
+
+// Admin route wrapper with auth and admin check
+const AdminRouteWrapper = ({ children }) => {
+  const { isAuthenticated, isAdmin, loading } = useAuth()
+  const navigate = useNavigate()
+  
+  // Show loading while checking auth status
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gray-50">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary-600 mx-auto mb-4"></div>
+          <p className="text-gray-600">Loading...</p>
+        </div>
+      </div>
+    )
+  }
+  
+  // Redirect to login if not authenticated
+  if (!isAuthenticated) {
+    navigate('/login', { replace: true })
+    return null
+  }
+  
+  // Show access denied if not admin
+  if (!isAdmin) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gray-50">
+        <div className="text-center">
+          <div className="mx-auto w-16 h-16 text-red-500 mb-4">
+            <svg fill="currentColor" viewBox="0 0 20 20">
+              <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
+            </svg>
+          </div>
+          <h2 className="text-2xl font-bold text-gray-900 mb-2">Access Denied</h2>
+          <p className="text-gray-600 mb-4">You don't have permission to access this page.</p>
+          <button
+            onClick={() => navigate('/dashboard')}
+            className="btn-primary"
+          >
+            Go to Dashboard
+          </button>
+        </div>
+      </div>
+    )
+  }
+  
+  return children
 }
 
 // Create the router configuration
 export const router = createBrowserRouter([
   {
     path: '/',
-    element: <TestComponent /> // Temporarily show test component
+    element: <Navigate to="/login" replace />
   },
   {
     path: '/login',
-    element: <LoginPage />
+    element: <LoginPageWrapper />
   },
   {
     path: '/register',
-    element: <RegisterPage />
+    element: <RegisterPageWrapper />
   },
   {
     path: '/reset-password',
@@ -104,43 +206,31 @@ export const router = createBrowserRouter([
   },
   {
     path: '/dashboard',
-    element: <PrivateRoute />,
+    element: <DashboardWrapper />,
     children: [
       {
-        path: '',
-        element: <Dashboard />,
-        children: [
-          {
-            index: true,
-            element: <DashboardHome />
-          },
-          {
-            path: 'profile',
-            element: <UserProfile />
-          },
-          {
-            path: 'settings',
-            element: <Settings />
-          }
-        ]
+        index: true,
+        element: <DashboardHome />
+      },
+      {
+        path: 'profile',
+        element: <UserProfile />
+      },
+      {
+        path: 'settings',
+        element: <Settings />
       }
     ]
   },
   {
     path: '/dashboard/users',
-    element: <AdminRoute />,
-    children: [
-      {
-        path: '',
-        element: <Dashboard />,
-        children: [
-          {
-            index: true,
-            element: <UserManagement />
-          }
-        ]
-      }
-    ]
+    element: (
+      <AdminRouteWrapper>
+        <Dashboard>
+          <UserManagement />
+        </Dashboard>
+      </AdminRouteWrapper>
+    )
   },
   {
     path: '*',

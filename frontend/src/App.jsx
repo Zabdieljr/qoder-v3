@@ -8,7 +8,7 @@ import DatabaseConnectionTest from './components/DatabaseConnectionTest.jsx'
 import './index.css'
 
 // Temporary flag to show database test
-const SHOW_DB_TEST = true
+const SHOW_DB_TEST = false
 
 // App wrapper that handles admin setup
 const AppWrapper = () => {

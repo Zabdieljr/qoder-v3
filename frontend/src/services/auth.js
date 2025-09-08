@@ -187,7 +187,40 @@ export class AuthService {
     try {
       console.log('Creating admin user with data:', adminData)
       
-      // First create auth user in Supabase Auth with email confirmation disabled
+      // First check if user already exists in auth.users
+      const { data: existingUsers, error: checkError } = await supabase.auth.admin.listUsers()
+      
+      if (!checkError && existingUsers?.users) {
+        const existingUser = existingUsers.users.find(u => u.email === adminData.email)
+        if (existingUser) {
+          console.log('User already exists in auth, attempting sign in...')
+          
+          // Try to sign in the existing user
+          const { data: signInData, error: signInError } = await supabase.auth.signInWithPassword({
+            email: adminData.email,
+            password: adminData.password
+          })
+          
+          if (!signInError && signInData.session) {
+            // Check if profile exists
+            const { data: profile } = await supabase
+              .from(TABLES.USERS)
+              .select('*')
+              .eq('email', adminData.email)
+              .single()
+            
+            return {
+              data: {
+                auth: signInData,
+                profile: profile
+              },
+              error: null
+            }
+          }
+        }
+      }
+      
+      // Create new auth user in Supabase Auth
       const { data: authData, error: authError } = await supabase.auth.signUp({
         email: adminData.email,
         password: adminData.password,
@@ -203,6 +236,38 @@ export class AuthService {
 
       if (authError) {
         console.error('Auth signup error:', authError)
+        
+        // Handle case where user already exists but password is wrong
+        if (authError.message?.includes('already registered') || authError.message?.includes('already exists')) {
+          console.log('User exists, trying to sign in instead...')
+          
+          const { data: signInData, error: signInError } = await supabase.auth.signInWithPassword({
+            email: adminData.email,
+            password: adminData.password
+          })
+          
+          if (signInError) {
+            throw new Error(`User exists but sign-in failed: ${signInError.message}. Please check the password or use account recovery.`)
+          }
+          
+          // Check if profile exists
+          const { data: existingProfile } = await supabase
+            .from(TABLES.USERS)
+            .select('*')
+            .eq('email', adminData.email)
+            .single()
+          
+          if (existingProfile) {
+            return {
+              data: {
+                auth: signInData,
+                profile: existingProfile
+              },
+              error: null
+            }
+          }
+        }
+        
         throw authError
       }
 
@@ -246,37 +311,39 @@ export class AuthService {
 
         console.log('Admin user profile created successfully:', insertedProfile)
         
-        // If no session was created automatically, try to sign in the user
-        if (!authData.session) {
-          console.log('No session created during signup, attempting to sign in...')
-          
-          const { data: signInData, error: signInError } = await supabase.auth.signInWithPassword({
-            email: adminData.email,
-            password: adminData.password
-          })
-          
-          if (signInError) {
-            console.warn('Auto sign-in failed, but user and profile were created:', signInError)
-            // Don't throw error here - the user was created successfully
-          } else {
-            console.log('Successfully signed in after creation:', signInData)
-            return {
-              data: {
-                auth: signInData,
-                profile: insertedProfile
-              },
-              error: null
-            }
+        // Always attempt to create a session by signing in
+        console.log('Attempting to create session by signing in...')
+        
+        // Wait a moment for auth system to process
+        await new Promise(resolve => setTimeout(resolve, 1000))
+        
+        const { data: signInData, error: signInError } = await supabase.auth.signInWithPassword({
+          email: adminData.email,
+          password: adminData.password
+        })
+        
+        if (signInError) {
+          console.warn('Sign-in after creation failed:', signInError)
+          // Still return success since user and profile were created
+          return {
+            data: {
+              auth: authData,
+              profile: insertedProfile,
+              message: 'Admin user created successfully. Please sign in manually.'
+            },
+            error: null
           }
         }
         
-        return { 
-          data: { 
-            auth: authData, 
-            profile: insertedProfile 
-          }, 
-          error: null 
+        console.log('Successfully signed in after creation:', signInData)
+        return {
+          data: {
+            auth: signInData,
+            profile: insertedProfile
+          },
+          error: null
         }
+        
       } else {
         throw new Error('User creation failed - no user object returned from Supabase Auth')
       }

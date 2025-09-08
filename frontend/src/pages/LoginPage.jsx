@@ -1,7 +1,8 @@
 import React, { useEffect } from 'react'
-import { useNavigate, useLocation } from 'react-router-dom'
+import { useNavigate, useLocation, Link } from 'react-router-dom'
 import { useAuth } from '../contexts/AuthContext.jsx'
 import LoginForm from '../components/LoginForm.jsx'
+import { Code2, Shield, Users, Zap } from 'lucide-react'
 
 export const LoginPage = () => {
   const { signIn, loading, error, clearError, isAuthenticated } = useAuth()
@@ -37,17 +38,20 @@ export const LoginPage = () => {
   return (
     <div className="min-h-screen flex">
       {/* Left Side - Login Form */}
-      <div className="flex-1 flex flex-col justify-center py-12 px-4 sm:px-6 lg:px-20 xl:px-24">
+      <div className="flex-1 flex flex-col justify-center py-12 px-4 sm:px-6 lg:px-20 xl:px-24 bg-white">
         <div className="mx-auto w-full max-w-sm lg:w-96">
           {/* Header */}
-          <div className="text-center">
-            <h1 className="text-4xl font-bold text-gray-900 mb-2">
-              Qoder V3
-            </h1>
-            <h2 className="text-2xl font-semibold text-gray-700 mb-2">
+          <div className="text-center mb-8">
+            <Link to="/" className="inline-flex items-center space-x-2 mb-6">
+              <div className="w-10 h-10 bg-gradient-to-r from-primary-600 to-primary-700 rounded-xl flex items-center justify-center">
+                <Code2 className="h-6 w-6 text-white" />
+              </div>
+              <span className="text-2xl font-bold text-gray-900">Qoder V3</span>
+            </Link>
+            <h1 className="text-3xl font-bold text-gray-900 mb-2">
               Welcome Back
-            </h2>
-            <p className="text-gray-600 mb-8">
+            </h1>
+            <p className="text-gray-600">
               Sign in to your account to continue
             </p>
           </div>
@@ -75,32 +79,38 @@ export const LoginPage = () => {
         </div>
       </div>
 
-      {/* Right Side - Branding/Image */}
+      {/* Right Side - Branding */}
       <div className="hidden lg:block relative w-0 flex-1">
-        <div className="absolute inset-0 bg-gradient-to-br from-primary-600 to-primary-900 flex items-center justify-center">
-          <div className="text-center text-white p-8">
+        <div className="absolute inset-0 bg-gradient-to-br from-primary-600 via-primary-700 to-primary-900 flex items-center justify-center">
+          <div className="text-center text-white p-8 max-w-md">
             <div className="mb-8">
-              <div className="mx-auto w-24 h-24 bg-white bg-opacity-20 rounded-full flex items-center justify-center mb-6">
-                <svg 
-                  className="w-12 h-12 text-white" 
-                  fill="currentColor" 
-                  viewBox="0 0 20 20"
-                >
-                  <path fillRule="evenodd" d="M10 2L3 7v11h4v-6h6v6h4V7l-7-5z" clipRule="evenodd" />
-                </svg>
+              <div className="mx-auto w-20 h-20 bg-white/20 backdrop-blur-sm rounded-2xl flex items-center justify-center mb-6">
+                <Code2 className="w-10 h-10 text-white" />
               </div>
             </div>
             <h3 className="text-3xl font-bold mb-4">
-              User Management System
+              Modern User Management
             </h3>
-            <p className="text-xl text-blue-100 mb-6">
-              Secure, scalable, and modern user administration
+            <p className="text-xl text-primary-100 mb-8 leading-relaxed">
+              Secure, scalable, and developer-friendly platform for the future of web applications
             </p>
-            <div className="space-y-2 text-blue-200">
-              <p>✓ Role-based access control</p>
-              <p>✓ Real-time user management</p>
-              <p>✓ Secure authentication</p>
-              <p>✓ Modern responsive design</p>
+            <div className="grid grid-cols-2 gap-4 text-primary-100">
+              <div className="flex items-center space-x-2">
+                <Shield className="h-5 w-5" />
+                <span className="text-sm">Enterprise Security</span>
+              </div>
+              <div className="flex items-center space-x-2">
+                <Users className="h-5 w-5" />
+                <span className="text-sm">Role Management</span>
+              </div>
+              <div className="flex items-center space-x-2">
+                <Zap className="h-5 w-5" />
+                <span className="text-sm">Lightning Fast</span>
+              </div>
+              <div className="flex items-center space-x-2">
+                <Code2 className="h-5 w-5" />
+                <span className="text-sm">Modern Tech</span>
+              </div>
             </div>
           </div>
         </div>

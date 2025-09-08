@@ -2,8 +2,9 @@ import React, { useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { yupResolver } from '@hookform/resolvers/yup'
 import * as yup from 'yup'
-import { Eye, EyeOff, UserPlus, Loader2, Check, X } from 'lucide-react'
+import { Eye, EyeOff, UserPlus, Check, X, User, Mail, Lock, AlertCircle } from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
+import { LoadingSpinner } from './ui/LoadingSpinner.jsx'
 
 // Validation schema
 const registerSchema = yup.object({
@@ -116,39 +117,51 @@ export const RegisterForm = ({ onSubmit, loading = false, error = null }) => {
     <form onSubmit={handleSubmit(handleFormSubmit)} className="space-y-4" noValidate>
       {/* Name Fields */}
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-        <div>
-          <label htmlFor="firstName" className="block text-sm font-medium text-gray-700 mb-1">
+        <div className="form-group">
+          <label htmlFor="firstName" className="block text-sm font-medium text-gray-700 mb-2">
             First Name
           </label>
-          <input
-            {...register('firstName')}
-            type="text"
-            id="firstName"
-            autoComplete="given-name"
-            className={`form-input ${errors.firstName ? 'border-red-500 focus:ring-red-500' : ''}`}
-            placeholder="John"
-            disabled={isLoading}
-          />
+          <div className="relative">
+            <User className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
+            <input
+              {...register('firstName')}
+              type="text"
+              id="firstName"
+              autoComplete="given-name"
+              className={`form-input-modern pl-10 ${errors.firstName ? 'border-red-300 focus:ring-red-500 focus:border-red-500' : ''}`}
+              placeholder="John"
+              disabled={isLoading}
+            />
+          </div>
           {errors.firstName && (
-            <p className="form-error">{errors.firstName.message}</p>
+            <p className="form-error">
+              <AlertCircle className="h-4 w-4" />
+              <span>{errors.firstName.message}</span>
+            </p>
           )}
         </div>
 
-        <div>
-          <label htmlFor="lastName" className="block text-sm font-medium text-gray-700 mb-1">
+        <div className="form-group">
+          <label htmlFor="lastName" className="block text-sm font-medium text-gray-700 mb-2">
             Last Name
           </label>
-          <input
-            {...register('lastName')}
-            type="text"
-            id="lastName"
-            autoComplete="family-name"
-            className={`form-input ${errors.lastName ? 'border-red-500 focus:ring-red-500' : ''}`}
-            placeholder="Doe"
-            disabled={isLoading}
-          />
+          <div className="relative">
+            <User className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
+            <input
+              {...register('lastName')}
+              type="text"
+              id="lastName"
+              autoComplete="family-name"
+              className={`form-input-modern pl-10 ${errors.lastName ? 'border-red-300 focus:ring-red-500 focus:border-red-500' : ''}`}
+              placeholder="Doe"
+              disabled={isLoading}
+            />
+          </div>
           {errors.lastName && (
-            <p className="form-error">{errors.lastName.message}</p>
+            <p className="form-error">
+              <AlertCircle className="h-4 w-4" />
+              <span>{errors.lastName.message}</span>
+            </p>
           )}
         </div>
       </div>
@@ -307,12 +320,12 @@ export const RegisterForm = ({ onSubmit, loading = false, error = null }) => {
         <button
           type="submit"
           disabled={isLoading}
-          className="w-full btn-primary flex items-center justify-center py-3 text-base font-medium"
+          className="w-full btn-primary-modern flex items-center justify-center py-3 text-base font-medium"
         >
           {isLoading ? (
             <>
-              <Loader2 className="animate-spin -ml-1 mr-3 h-5 w-5" />
-              Creating Account...
+              <LoadingSpinner size="sm" />
+              <span className="ml-2">Creating Account...</span>
             </>
           ) : (
             <>

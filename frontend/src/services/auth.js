@@ -187,15 +187,24 @@ export class AuthService {
     try {
       console.log('Creating admin user with data:', adminData)
       
+      // First, let's check what columns actually exist in the users table
+      console.log('Checking table structure...')
+      const { data: tableInfo, error: tableError } = await supabase
+        .from(TABLES.USERS)
+        .select('*')
+        .limit(0)
+      
+      if (tableError) {
+        console.error('Table structure check failed:', tableError)
+      }
+      
       // First create auth user
       const { data: authData, error: authError } = await supabase.auth.signUp({
         email: adminData.email,
         password: adminData.password,
         options: {
           data: {
-            username: adminData.username,
-            first_name: 'Admin',
-            last_name: 'User'
+            username: adminData.username
           }
         }
       })
@@ -207,28 +216,16 @@ export class AuthService {
 
       console.log('Auth user created:', authData)
 
-      // Create profile with admin privileges - using only basic fields first
+      // Create profile with only essential fields that we know exist
       if (authData.user) {
-        // Try with minimal fields first
         const profileData = {
           id: authData.user.id,
           email: adminData.email,
           username: adminData.username,
-          status: USER_STATUS.ACTIVE,
-          created_at: new Date().toISOString(),
-          updated_at: new Date().toISOString()
+          status: USER_STATUS.ACTIVE
         }
 
-        // Add optional fields if they exist in the table
-        try {
-          profileData.first_name = 'Admin'
-          profileData.last_name = 'User'
-          profileData.full_name = 'Admin User'
-        } catch (e) {
-          console.warn('Optional fields not available, using minimal profile')
-        }
-
-        console.log('Attempting to insert profile:', profileData)
+        console.log('Attempting to insert minimal profile:', profileData)
 
         const { data: insertedProfile, error: profileError } = await supabase
           .from(TABLES.USERS)
@@ -238,6 +235,7 @@ export class AuthService {
 
         if (profileError) {
           console.error('Profile creation error:', profileError)
+          console.error('Full error details:', JSON.stringify(profileError, null, 2))
           throw profileError
         }
 
@@ -248,6 +246,7 @@ export class AuthService {
       return { data: authData, error: null }
     } catch (error) {
       console.error('Create admin user error:', error)
+      console.error('Full error details:', JSON.stringify(error, null, 2))
       return { data: null, error }
     }
   }

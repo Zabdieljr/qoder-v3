@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react'
 import { RouterProvider } from 'react-router-dom'
 import { AuthProvider } from './contexts/AuthContext.jsx'
+import { ToastProvider } from './contexts/ToastContext.jsx'
 import { router } from './router/index.jsx'
 import ErrorBoundary from './components/ErrorBoundary.jsx'
 import AdminSetup, { useAdminSetup } from './components/AdminSetup.jsx'
@@ -102,9 +103,11 @@ function App() {
 
   return (
     <ErrorBoundary>
-      <AuthProvider>
-        <AppWrapper />
-      </AuthProvider>
+      <ToastProvider>
+        <AuthProvider>
+          <AppWrapper />
+        </AuthProvider>
+      </ToastProvider>
     </ErrorBoundary>
   )
 }

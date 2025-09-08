@@ -3,6 +3,7 @@ import { createBrowserRouter, Navigate } from 'react-router-dom'
 import { PublicRoute, PrivateRoute, AdminRoute } from '../components/RouteGuards.jsx'
 
 // Import pages
+import LandingPage from '../pages/LandingPage.jsx'
 import { LoginPage } from '../pages/LoginPage.jsx'
 import { RegisterPage } from '../pages/RegisterPage.jsx'
 import Dashboard, { DashboardHome } from '../pages/Dashboard.jsx'
@@ -61,7 +62,7 @@ const ResetPassword = () => (
 export const router = createBrowserRouter([
   {
     path: '/',
-    element: <Navigate to="/login" replace />
+    element: <LandingPage />
   },
   {
     path: '/login',

@@ -1,10 +1,16 @@
 {
   "name": "qoder-v3-frontend",
   "version": 2,
-  "buildCommand": "cd frontend && npm install && npm run build",
+  "framework": null,
+  "buildCommand": "cd frontend && npm run build",
   "outputDirectory": "frontend/dist",
   "installCommand": "cd frontend && npm install",
-  "framework": null,
+  "nodeVersion": "18.x",
+  "functions": {
+    "frontend/src/**/*.js": {
+      "runtime": "nodejs18.x"
+    }
+  },
   "rewrites": [
     {
       "source": "/api/(.*)",
@@ -59,8 +65,8 @@
   ],
   "env": {
     "VITE_SUPABASE_URL": "https://kmcuhicgzwdcalnyywgo.supabase.co",
-    "VITE_SUPABASE_ANON_KEY": "$VITE_SUPABASE_ANON_KEY",
-    "VITE_APP_NAME": "Qoder V3 - User Management",
-    "VITE_APP_VERSION": "1.0.0"
+    "VITE_SUPABASE_ANON_KEY": "@vite_supabase_anon_key",
+    "VITE_APP_NAME": "Qoder V3 - Modern User Management",
+    "VITE_APP_VERSION": "2.0.0"
   }
 }

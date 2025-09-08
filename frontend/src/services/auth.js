@@ -200,7 +200,7 @@ export class AuthService {
 
       if (authError) throw authError
 
-      // Create profile with admin privileges
+      // Create profile with admin privileges - using minimal required fields
       if (authData.user) {
         const { data: profileData, error: profileError } = await supabase
           .from(TABLES.USERS)
@@ -213,7 +213,6 @@ export class AuthService {
               last_name: 'User',
               full_name: 'Admin User',
               status: USER_STATUS.ACTIVE,
-              email_verified: true,
               created_at: new Date().toISOString(),
               updated_at: new Date().toISOString()
             }

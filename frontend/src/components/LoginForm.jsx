@@ -2,9 +2,8 @@ import React, { useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { yupResolver } from '@hookform/resolvers/yup'
 import * as yup from 'yup'
-import { Eye, EyeOff, LogIn, Mail, Lock, AlertCircle } from 'lucide-react'
+import { Eye, EyeOff, LogIn, Loader2 } from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
-import { LoadingSpinner } from './ui/LoadingSpinner.jsx'
 
 // Validation schema
 const loginSchema = yup.object({
@@ -54,50 +53,43 @@ export const LoginForm = ({ onSubmit, loading = false, error = null }) => {
   return (
     <form onSubmit={handleSubmit(handleFormSubmit)} className="space-y-6" noValidate>
       {/* Email Field */}
-      <div className="form-group">
+      <div>
         <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-2">
           Email Address
         </label>
-        <div className="relative">
-          <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
-          <input
-            {...register('email')}
-            type="email"
-            id="email"
-            autoComplete="email"
-            className={`form-input-modern pl-10 ${errors.email ? 'border-red-300 focus:ring-red-500 focus:border-red-500' : ''}`}
-            placeholder="Enter your email address"
-            disabled={isLoading}
-          />
-        </div>
+        <input
+          {...register('email')}
+          type="email"
+          id="email"
+          autoComplete="email"
+          className={`form-input ${errors.email ? 'border-red-500 focus:ring-red-500' : ''}`}
+          placeholder="Enter your email address"
+          disabled={isLoading}
+        />
         {errors.email && (
-          <p className="form-error">
-            <AlertCircle className="h-4 w-4" />
-            <span>{errors.email.message}</span>
-          </p>
+          <p className="form-error">{errors.email.message}</p>
         )}
       </div>
 
       {/* Password Field */}
-      <div className="form-group">
+      <div>
         <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-2">
           Password
         </label>
         <div className="relative">
-          <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
           <input
             {...register('password')}
             type={showPassword ? 'text' : 'password'}
             id="password"
             autoComplete="current-password"
-            className={`form-input-modern pl-10 pr-10 ${errors.password ? 'border-red-300 focus:ring-red-500 focus:border-red-500' : ''}`}
+            className={`form-input pr-10 ${errors.password ? 'border-red-500 focus:ring-red-500' : ''}`}
             placeholder="Enter your password"
             disabled={isLoading}
           />
           <button
             type="button"
             onClick={togglePasswordVisibility}
-            className="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 hover:text-gray-600 focus:outline-none focus:text-gray-600 transition-colors"
+            className="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 hover:text-gray-600"
             disabled={isLoading}
           >
             {showPassword ? (
@@ -108,10 +100,7 @@ export const LoginForm = ({ onSubmit, loading = false, error = null }) => {
           </button>
         </div>
         {errors.password && (
-          <p className="form-error">
-            <AlertCircle className="h-4 w-4" />
-            <span>{errors.password.message}</span>
-          </p>
+          <p className="form-error">{errors.password.message}</p>
         )}
       </div>
 
@@ -164,12 +153,12 @@ export const LoginForm = ({ onSubmit, loading = false, error = null }) => {
         <button
           type="submit"
           disabled={isLoading}
-          className="w-full btn-primary-modern flex items-center justify-center py-3 text-base font-medium"
+          className="w-full btn-primary flex items-center justify-center py-3 text-base font-medium"
         >
           {isLoading ? (
             <>
-              <LoadingSpinner size="sm" />
-              <span className="ml-2">Signing In...</span>
+              <Loader2 className="animate-spin -ml-1 mr-3 h-5 w-5" />
+              Signing In...
             </>
           ) : (
             <>

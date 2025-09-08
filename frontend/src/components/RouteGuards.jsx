@@ -14,53 +14,68 @@ const LoadingSpinner = () => (
 
 // Public Route - Redirects authenticated users to dashboard
 export const PublicRoute = () => {
-  const { isAuthenticated, loading } = useAuth()
+  const { isAuthenticated, loading, user, session } = useAuth()
   const location = useLocation()
 
+  console.log('PublicRoute:', { isAuthenticated, loading, hasUser: !!user, hasSession: !!session })
+
   if (loading) {
+    console.log('PublicRoute: Loading state, showing spinner')
     return <LoadingSpinner />
   }
 
   if (isAuthenticated) {
     // Get the redirect path from state or default to dashboard
     const from = location.state?.from?.pathname || '/dashboard'
+    console.log('PublicRoute: User is authenticated, redirecting to', from)
     return <Navigate to={from} replace />
   }
 
+  console.log('PublicRoute: User not authenticated, showing public content')
   return <Outlet />
 }
 
 // Private Route - Requires authentication
 export const PrivateRoute = () => {
-  const { isAuthenticated, loading } = useAuth()
+  const { isAuthenticated, loading, user, session } = useAuth()
   const location = useLocation()
 
+  console.log('PrivateRoute:', { isAuthenticated, loading, hasUser: !!user, hasSession: !!session, path: location.pathname })
+
   if (loading) {
+    console.log('PrivateRoute: Loading state, showing spinner')
     return <LoadingSpinner />
   }
 
   if (!isAuthenticated) {
+    console.log('PrivateRoute: User not authenticated, redirecting to login')
     // Save the attempted location to redirect back after login
     return <Navigate to="/login" state={{ from: location }} replace />
   }
 
+  console.log('PrivateRoute: User authenticated, allowing access')
   return <Outlet />
 }
 
 // Admin Route - Requires admin privileges
 export const AdminRoute = () => {
-  const { isAuthenticated, isAdmin, loading } = useAuth()
+  const { isAuthenticated, isAdmin, loading, user, session } = useAuth()
   const location = useLocation()
 
+  console.log('AdminRoute:', { isAuthenticated, isAdmin, loading, hasUser: !!user, hasSession: !!session })
+
   if (loading) {
+    console.log('AdminRoute: Loading state, showing spinner')
     return <LoadingSpinner />
   }
 
   if (!isAuthenticated) {
+    console.log('AdminRoute: User not authenticated, redirecting to login')
     return <Navigate to="/login" state={{ from: location }} replace />
   }
 
   if (!isAdmin) {
+    console.log('AdminRoute: User not admin, showing access denied')
     return (
       <div className="min-h-screen flex items-center justify-center bg-gray-50">
         <div className="text-center">
@@ -77,9 +92,9 @@ export const AdminRoute = () => {
     )
   }
 
+  console.log('AdminRoute: User is admin, allowing access')
   return <Outlet />
 }
-
 // Route Guard HOC for individual components
 export const withAuthGuard = (Component, requireAdmin = false) => {
   return function AuthGuardedComponent(props) {

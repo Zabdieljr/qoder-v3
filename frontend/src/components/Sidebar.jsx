@@ -1,5 +1,5 @@
 import React from 'react'
-import { NavLink, useLocation } from 'react-router-dom'
+import { NavLink, useLocation, useNavigate } from 'react-router-dom'
 import { 
   Home, 
   User, 
@@ -33,9 +33,17 @@ const SidebarItem = ({ to, icon: Icon, label, onClick }) => {
 export const Sidebar = ({ isOpen, onClose }) => {
   const { user, signOut, isAdmin } = useAuth()
   const location = useLocation()
+  const navigate = useNavigate()
 
   const handleSignOut = async () => {
-    await signOut()
+    console.log('Sidebar: Signing out user...')
+    const result = await signOut()
+    if (result.success || !result.error) {
+      console.log('Sidebar: Sign out successful, redirecting to login')
+      navigate('/login', { replace: true })
+    } else {
+      console.error('Sidebar: Sign out failed:', result.error)
+    }
     onClose?.()
   }
 

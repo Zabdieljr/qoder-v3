@@ -25,17 +25,7 @@ export const AuthProvider = ({ children }) => {
       try {
         console.log('AuthContext: Initializing auth state...')
         
-        // Add timeout to prevent hanging
-        const timeoutId = setTimeout(() => {
-          console.warn('AuthContext: Initialization timeout, setting loading to false')
-          if (mounted) {
-            setLoading(false)
-          }
-        }, 5000) // 5 second timeout
-        
         const { session, error } = await authService.getSession()
-        
-        clearTimeout(timeoutId)
         
         if (error) {
           console.error('AuthContext: Session error:', error)
@@ -49,7 +39,7 @@ export const AuthProvider = ({ children }) => {
             console.error('AuthContext: User fetch error:', userError)
             setError(userError.message)
           } else {
-            console.log('AuthContext: User loaded successfully')
+            console.log('AuthContext: User loaded successfully:', currentUser)
             setUser(currentUser)
           }
         } else {
@@ -270,9 +260,20 @@ export const AuthProvider = ({ children }) => {
   }
 
   // Helper functions
-  const isAuthenticated = !!session
+  const isAuthenticated = !!session && !!user
   const isAdmin = user?.profile?.username === 'zarenas' || false
   const userRole = isAdmin ? 'ADMIN' : 'USER'
+
+  // Debug auth state
+  console.log('AuthContext state:', {
+    hasSession: !!session,
+    hasUser: !!user,
+    isAuthenticated,
+    isAdmin,
+    loading,
+    userEmail: user?.email,
+    username: user?.profile?.username
+  })
 
   const value = {
     // State

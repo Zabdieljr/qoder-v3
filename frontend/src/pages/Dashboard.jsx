@@ -77,7 +77,7 @@ const RecentActivity = () => {
 
 // Main Dashboard Overview Component
 const DashboardOverview = () => {
-  const { user, isAdmin } = useAuth()
+  const { user, isAdmin, isAuthenticated } = useAuth()
   const [stats, setStats] = useState({
     totalUsers: 0,
     activeUsers: 0,
@@ -85,6 +85,13 @@ const DashboardOverview = () => {
     newUsersToday: 0
   })
   const [loading, setLoading] = useState(true)
+
+  // Debug user data
+  useEffect(() => {
+    console.log('Dashboard: User data:', user)
+    console.log('Dashboard: Is authenticated:', isAuthenticated)
+    console.log('Dashboard: Is admin:', isAdmin)
+  }, [user, isAuthenticated, isAdmin])
 
   useEffect(() => {
     const fetchStats = async () => {

@@ -214,49 +214,39 @@ export const useAdminSetup = () => {
   }, [])
 
   const checkSetupStatus = async () => {
+    let mounted = true
+    
     try {
       console.log('useAdminSetup: Starting setup status check...')
       setChecking(true)
       
-      // Add timeout to prevent infinite hanging
+      // Aggressive timeout to prevent hanging - based on memory guidance
       const timeoutId = setTimeout(() => {
-        console.error('useAdminSetup: Timeout reached, assuming setup is needed')
-        setSetupNeeded(true)
-        setChecking(false)
-      }, 3000) // Reduced to 3 seconds
+        if (mounted) {
+          console.error('useAdminSetup: TIMEOUT - Assuming setup is needed and stopping check')
+          setSetupNeeded(true)
+          setChecking(false)
+        }
+      }, 3000) // 3 second timeout as per memory
       
-      // Try a simpler approach - check if we can connect to Supabase at all
-      console.log('useAdminSetup: Testing basic Supabase connectivity...')
+      // Try the database check with AbortController
+      const controller = new AbortController()
+      const checkTimeout = setTimeout(() => controller.abort(), 2000)
       
-      // Simple connectivity test first
-      const { data: testData, error: testError } = await supabase
+      console.log('useAdminSetup: Testing database connectivity...')
+      
+      const { data: users, error } = await supabase
         .from('users')
-        .select('count', { count: 'exact', head: true })
+        .select('id, username, email')
+        .limit(5)
+        .abortSignal(controller.signal)
       
+      clearTimeout(checkTimeout)
       clearTimeout(timeoutId)
       
-      if (testError) {
-        console.log('useAdminSetup: Database connectivity test failed:', testError.message)
-        // If we can't connect, assume we need to set up
-        setSetupNeeded(true)
-        setChecking(false)
-        return
-      }
+      if (!mounted) return
       
-      console.log('useAdminSetup: Database connected, checking for users...')
-      
-      // Now try to get actual user data with a more permissive query
-      const { data: users, error } = await Promise.race([
-        supabase
-          .from('users')
-          .select('id, username, email')
-          .limit(10),
-        new Promise((_, reject) => 
-          setTimeout(() => reject(new Error('Query timeout')), 2000)
-        )
-      ])
-      
-      console.log('useAdminSetup: Users query result:', { 
+      console.log('useAdminSetup: Query result:', { 
         usersCount: users?.length || 0, 
         error: error?.message || 'none'
       })
@@ -266,21 +256,27 @@ export const useAdminSetup = () => {
           user.username === ADMIN_CONFIG.username || 
           user.email === ADMIN_CONFIG.email
         )
-        console.log('useAdminSetup: Admin exists check:', adminExists)
+        console.log('useAdminSetup: Admin exists:', adminExists)
         setSetupNeeded(!adminExists)
       } else {
-        console.log('useAdminSetup: Cannot determine admin status, showing setup')
-        // If we can't check reliably, show setup to be safe
+        console.log('useAdminSetup: Cannot determine admin status, assuming setup needed')
         setSetupNeeded(true)
       }
     } catch (err) {
-      console.error('useAdminSetup: Error checking setup status:', err)
-      console.error('useAdminSetup: Error details:', JSON.stringify(err, null, 2))
-      // On any error, assume setup is needed
-      setSetupNeeded(true)
+      if (mounted) {
+        console.error('useAdminSetup: Error during check:', err.name, err.message)
+        // On any error (including timeout), assume setup is needed
+        setSetupNeeded(true)
+      }
     } finally {
-      console.log('useAdminSetup: Checking complete, setting checking to false')
-      setChecking(false)
+      if (mounted) {
+        console.log('useAdminSetup: Check complete, setting checking to false')
+        setChecking(false)
+      }
+    }
+    
+    return () => {
+      mounted = false
     }
   }
 

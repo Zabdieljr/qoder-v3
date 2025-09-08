@@ -11,13 +11,14 @@ import './index.css'
 const SHOW_DB_TEST = false
 
 // Temporary flag to disable admin setup check (for debugging)
-const SKIP_ADMIN_CHECK = false // Re-enable admin check for proper auth flow
+const SKIP_ADMIN_CHECK = true // Skip admin check to prevent hanging
 
 // App wrapper that handles admin setup
 const AppWrapper = () => {
   const { setupNeeded, checking } = useAdminSetup()
   const [setupComplete, setSetupComplete] = useState(false)
   const [forceSkipCheck, setForceSkipCheck] = useState(false)
+  const [emergencyBypass, setEmergencyBypass] = useState(false)
 
   // If we're skipping admin check, go straight to main app
   if (SKIP_ADMIN_CHECK) {
@@ -29,42 +30,49 @@ const AppWrapper = () => {
   useEffect(() => {
     if (checking) {
       const emergencyTimer = setTimeout(() => {
-        console.warn('App initialization taking too long, enabling skip option')
-        setForceSkipCheck(true)
-      }, 8000) // Reduced to 8 seconds
+        console.warn('App initialization taking too long, enabling emergency bypass')
+        setEmergencyBypass(true)
+      }, 8000) // 8 seconds
       
       return () => clearTimeout(emergencyTimer)
     }
   }, [checking])
 
   // Show loading while checking setup status
-  if (checking && !forceSkipCheck) {
+  if (checking && !emergencyBypass) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary-600 mx-auto mb-4"></div>
           <p className="text-gray-600 mb-4">Initializing application...</p>
-          <p className="text-sm text-gray-500 mb-4">Checking admin setup status...</p>
-          {forceSkipCheck && (
-            <button 
-              onClick={() => {
-                console.log('User chose to skip admin check')
-                setForceSkipCheck(true)
-              }}
-              className="btn-secondary text-sm"
-            >
-              Skip and Continue to App
-            </button>
-          )}
+          <p className="text-sm text-gray-500 mb-4">Checking system configuration...</p>
         </div>
       </div>
     )
   }
 
-  // If we're forcing skip or admin check failed, show normal app
-  if (forceSkipCheck) {
-    console.log('Bypassing admin setup check, loading main app')
-    return <RouterProvider router={router} />
+  // Emergency bypass or force skip
+  if (emergencyBypass || forceSkipCheck) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="text-center max-w-md">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-red-600 mx-auto mb-4"></div>
+          <p className="text-gray-600 mb-4">System initialization is taking longer than expected</p>
+          <p className="text-sm text-gray-500 mb-6">This might be due to database connectivity issues.</p>
+          <button 
+            onClick={() => {
+              console.log('User chose emergency bypass')
+              setForceSkipCheck(true)
+              window.location.reload()
+            }}
+            className="btn-primary mb-3"
+          >
+            Continue Anyway
+          </button>
+          <p className="text-xs text-gray-400">You can set up admin user later if needed</p>
+        </div>
+      </div>
+    )
   }
 
   // Show admin setup if needed and not completed

@@ -7,7 +7,10 @@ import {
   Settings, 
   LogOut,
   Menu,
-  X
+  X,
+  ChevronLeft,
+  ChevronRight,
+  Code2
 } from 'lucide-react'
 import { useAuth } from '../contexts/AuthContext.jsx'
 

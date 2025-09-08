@@ -385,15 +385,38 @@ export class AuthService {
   // Get all users (admin function)
   async getAllUsers() {
     try {
+      console.log('AuthService.getAllUsers: Starting user fetch...')
+      
+      // Add a timeout to prevent hanging
+      const controller = new AbortController()
+      const timeoutId = setTimeout(() => {
+        console.log('AuthService.getAllUsers: Request timeout, aborting...')
+        controller.abort()
+      }, 8000) // 8 second timeout
+      
       const { data, error } = await supabase
         .from(TABLES.USERS)
-        .select('*')
+        .select('id, username, email, status, created_at')
         .order('created_at', { ascending: false })
+        .abortSignal(controller.signal)
 
-      if (error) throw error
-      return { data, error: null }
+      clearTimeout(timeoutId)
+      
+      if (error) {
+        console.error('AuthService.getAllUsers: Supabase error:', error)
+        throw error
+      }
+      
+      console.log('AuthService.getAllUsers: Success, found', data?.length || 0, 'users')
+      return { data: data || [], error: null }
     } catch (error) {
-      console.error('Get all users error:', error)
+      console.error('AuthService.getAllUsers: Error:', error)
+      
+      // Handle specific error types
+      if (error.name === 'AbortError') {
+        return { data: null, error: { message: 'Request timeout - database may be unavailable' } }
+      }
+      
       return { data: null, error }
     }
   }

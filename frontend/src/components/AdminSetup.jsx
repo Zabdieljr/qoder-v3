@@ -214,22 +214,48 @@ export const useAdminSetup = () => {
 
   const checkSetupStatus = async () => {
     try {
+      console.log('useAdminSetup: Starting setup status check...')
+      setChecking(true)
+      
+      // Add timeout to prevent infinite hanging
+      const timeoutId = setTimeout(() => {
+        console.error('useAdminSetup: Timeout reached, assuming setup is needed')
+        setSetupNeeded(true)
+        setChecking(false)
+      }, 5000) // 5 second timeout
+      
+      // First check if we can access the service at all
+      console.log('useAdminSetup: Testing service availability...')
+      
       const { data: users, error } = await authService.getAllUsers()
       
-      if (!error && users) {
+      // Clear timeout if we get a response
+      clearTimeout(timeoutId)
+      
+      console.log('useAdminSetup: Users fetch result:', { 
+        usersCount: users?.length || 0, 
+        error: error?.message || 'none'
+      })
+      
+      if (!error && users && Array.isArray(users)) {
         const adminExists = users.some(user => 
           user.username === ADMIN_CONFIG.username || 
           user.email === ADMIN_CONFIG.email
         )
+        console.log('useAdminSetup: Admin exists check:', adminExists)
         setSetupNeeded(!adminExists)
       } else {
-        // If we can't check, assume setup is needed
+        console.log('useAdminSetup: Cannot determine admin status, showing setup')
+        // If we can't check reliably, show setup to be safe
         setSetupNeeded(true)
       }
     } catch (err) {
-      console.error('Error checking setup status:', err)
+      console.error('useAdminSetup: Error checking setup status:', err)
+      console.error('useAdminSetup: Error details:', JSON.stringify(err, null, 2))
+      // On any error, assume setup is needed
       setSetupNeeded(true)
     } finally {
+      console.log('useAdminSetup: Checking complete, setting checking to false')
       setChecking(false)
     }
   }

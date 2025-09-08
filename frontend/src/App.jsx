@@ -14,17 +14,48 @@ const SHOW_DB_TEST = false
 const AppWrapper = () => {
   const { setupNeeded, checking } = useAdminSetup()
   const [setupComplete, setSetupComplete] = useState(false)
+  const [forceSkipCheck, setForceSkipCheck] = useState(false)
+
+  // Emergency bypass: if stuck on loading for too long, show skip option
+  useEffect(() => {
+    if (checking) {
+      const emergencyTimer = setTimeout(() => {
+        console.warn('App initialization taking too long, enabling skip option')
+        setForceSkipCheck(true)
+      }, 15000) // 15 seconds
+      
+      return () => clearTimeout(emergencyTimer)
+    }
+  }, [checking])
 
   // Show loading while checking setup status
-  if (checking) {
+  if (checking && !forceSkipCheck) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary-600 mx-auto mb-4"></div>
-          <p className="text-gray-600">Initializing application...</p>
+          <p className="text-gray-600 mb-4">Initializing application...</p>
+          <p className="text-sm text-gray-500 mb-4">Checking admin setup status...</p>
+          {forceSkipCheck && (
+            <button 
+              onClick={() => {
+                console.log('User chose to skip admin check')
+                setForceSkipCheck(true)
+              }}
+              className="btn-secondary text-sm"
+            >
+              Skip and Continue to App
+            </button>
+          )}
         </div>
       </div>
     )
+  }
+
+  // If we're forcing skip or admin check failed, show normal app
+  if (forceSkipCheck) {
+    console.log('Bypassing admin setup check, loading main app')
+    return <RouterProvider router={router} />
   }
 
   // Show admin setup if needed and not completed

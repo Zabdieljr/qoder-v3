@@ -187,24 +187,15 @@ export class AuthService {
     try {
       console.log('Creating admin user with data:', adminData)
       
-      // First, let's check what columns actually exist in the users table
-      console.log('Checking table structure...')
-      const { data: tableInfo, error: tableError } = await supabase
-        .from(TABLES.USERS)
-        .select('*')
-        .limit(0)
-      
-      if (tableError) {
-        console.error('Table structure check failed:', tableError)
-      }
-      
-      // First create auth user
+      // First create auth user in Supabase Auth
       const { data: authData, error: authError } = await supabase.auth.signUp({
         email: adminData.email,
         password: adminData.password,
         options: {
           data: {
-            username: adminData.username
+            username: adminData.username,
+            first_name: 'Admin',
+            last_name: 'User'
           }
         }
       })
@@ -214,18 +205,24 @@ export class AuthService {
         throw authError
       }
 
-      console.log('Auth user created:', authData)
+      console.log('Auth user created successfully:', authData)
 
-      // Create profile with only essential fields that we know exist
+      // Create user profile in our users table
       if (authData.user) {
         const profileData = {
           id: authData.user.id,
-          email: adminData.email,
           username: adminData.username,
-          status: USER_STATUS.ACTIVE
+          email: adminData.email,
+          first_name: 'Admin',
+          last_name: 'User',
+          full_name: 'Admin User',
+          status: USER_STATUS.ACTIVE,
+          email_verified: true,
+          created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString()
         }
 
-        console.log('Attempting to insert minimal profile:', profileData)
+        console.log('Creating user profile with data:', profileData)
 
         const { data: insertedProfile, error: profileError } = await supabase
           .from(TABLES.USERS)
@@ -239,8 +236,14 @@ export class AuthService {
           throw profileError
         }
 
-        console.log('Profile created successfully:', insertedProfile)
-        return { data: { auth: authData, profile: insertedProfile }, error: null }
+        console.log('Admin user profile created successfully:', insertedProfile)
+        return { 
+          data: { 
+            auth: authData, 
+            profile: insertedProfile 
+          }, 
+          error: null 
+        }
       }
 
       return { data: authData, error: null }

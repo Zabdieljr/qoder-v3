@@ -23,27 +23,44 @@ export const AuthProvider = ({ children }) => {
 
     async function getInitialSession() {
       try {
+        console.log('AuthContext: Initializing auth state...')
+        
+        // Add timeout to prevent hanging
+        const timeoutId = setTimeout(() => {
+          console.warn('AuthContext: Initialization timeout, setting loading to false')
+          if (mounted) {
+            setLoading(false)
+          }
+        }, 5000) // 5 second timeout
+        
         const { session, error } = await authService.getSession()
         
+        clearTimeout(timeoutId)
+        
         if (error) {
-          console.error('Session error:', error)
+          console.error('AuthContext: Session error:', error)
           setError(error.message)
         } else if (session && mounted) {
+          console.log('AuthContext: Session found, fetching user...')
           setSession(session)
           const { user: currentUser, error: userError } = await authService.getCurrentUser()
           
           if (userError) {
-            console.error('User fetch error:', userError)
+            console.error('AuthContext: User fetch error:', userError)
             setError(userError.message)
           } else {
+            console.log('AuthContext: User loaded successfully')
             setUser(currentUser)
           }
+        } else {
+          console.log('AuthContext: No session found')
         }
       } catch (err) {
-        console.error('Auth initialization error:', err)
+        console.error('AuthContext: Auth initialization error:', err)
         setError(err.message)
       } finally {
         if (mounted) {
+          console.log('AuthContext: Initialization complete, setting loading to false')
           setLoading(false)
         }
       }

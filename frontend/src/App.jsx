@@ -1,60 +1,50 @@
-import React, { useState, useEffect } from 'react'
-import { RouterProvider } from 'react-router-dom'
-import { AuthProvider } from './contexts/AuthContext.jsx'
-import { router } from './router/index.jsx'
-import ErrorBoundary from './components/ErrorBoundary.jsx'
-import AdminSetup, { useAdminSetup } from './components/AdminSetup.jsx'
-import DiagnosticTest from './components/DiagnosticTest.jsx'
-import './index.css'
+import React from 'react'
 
-// Temporary diagnostic mode - set to true to debug
-const DIAGNOSTIC_MODE = true
-
-// App wrapper that handles admin setup
-const AppWrapper = () => {
-  const { setupNeeded, checking } = useAdminSetup()
-  const [setupComplete, setSetupComplete] = useState(false)
-
-  // Show loading while checking setup status
-  if (checking) {
-    return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary-600 mx-auto mb-4"></div>
-          <p className="text-gray-600">Initializing application...</p>
+// Minimal test component
+const MinimalTest = () => {
+  return (
+    <div style={{
+      minHeight: '100vh',
+      backgroundColor: '#f3f4f6',
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'center',
+      padding: '20px'
+    }}>
+      <div style={{
+        backgroundColor: 'white',
+        padding: '40px',
+        borderRadius: '8px',
+        boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)',
+        textAlign: 'center',
+        maxWidth: '500px'
+      }}>
+        <h1 style={{ color: '#1f2937', marginBottom: '20px' }}>🎉 Frontend is Working!</h1>
+        <p style={{ color: '#6b7280', marginBottom: '20px' }}>The Vercel deployment is successful.</p>
+        <div style={{ 
+          backgroundColor: '#f0f9ff', 
+          padding: '15px', 
+          borderRadius: '6px',
+          border: '1px solid #0ea5e9'
+        }}>
+          <h3 style={{ color: '#0369a1', margin: '0 0 10px 0' }}>Environment Check:</h3>
+          <p style={{ color: '#0369a1', margin: '5px 0' }}>
+            Supabase URL: {import.meta.env.VITE_SUPABASE_URL ? '✅ SET' : '❌ MISSING'}
+          </p>
+          <p style={{ color: '#0369a1', margin: '5px 0' }}>
+            Supabase Key: {import.meta.env.VITE_SUPABASE_ANON_KEY ? '✅ SET' : '❌ MISSING'}
+          </p>
         </div>
+        <p style={{ color: '#6b7280', marginTop: '20px', fontSize: '14px' }}>
+          Time: {new Date().toLocaleString()}
+        </p>
       </div>
-    )
-  }
-
-  // Show admin setup if needed and not completed
-  if (setupNeeded && !setupComplete) {
-    return (
-      <AdminSetup onComplete={() => setSetupComplete(true)} />
-    )
-  }
-
-  // Normal app flow
-  return <RouterProvider router={router} />
+    </div>
+  )
 }
 
 function App() {
-  // Show diagnostic test if enabled
-  if (DIAGNOSTIC_MODE) {
-    return (
-      <ErrorBoundary>
-        <DiagnosticTest />
-      </ErrorBoundary>
-    )
-  }
-
-  return (
-    <ErrorBoundary>
-      <AuthProvider>
-        <AppWrapper />
-      </AuthProvider>
-    </ErrorBoundary>
-  )
+  return <MinimalTest />
 }
 
 export default App

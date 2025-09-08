@@ -3,6 +3,7 @@ import { useForm } from 'react-hook-form'
 import { yupResolver } from '@hookform/resolvers/yup'
 import * as yup from 'yup'
 import { Eye, EyeOff, LogIn, Loader2 } from 'lucide-react'
+import { useNavigate } from 'react-router-dom'
 
 // Validation schema
 const loginSchema = yup.object({
@@ -19,6 +20,7 @@ const loginSchema = yup.object({
 export const LoginForm = ({ onSubmit, loading = false, error = null }) => {
   const [showPassword, setShowPassword] = useState(false)
   const [rememberMe, setRememberMe] = useState(false)
+  const navigate = useNavigate()
 
   const {
     register,
@@ -120,12 +122,13 @@ export const LoginForm = ({ onSubmit, loading = false, error = null }) => {
         </div>
 
         <div className="text-sm">
-          <a
-            href="/forgot-password"
-            className="font-medium text-primary-600 hover:text-primary-500 focus:outline-none focus:underline"
+          <button
+            type="button"
+            onClick={() => navigate('/reset-password')}
+            className="font-medium text-primary-600 hover:text-primary-500 focus:outline-none focus:underline bg-transparent border-none cursor-pointer"
           >
             Forgot your password?
-          </a>
+          </button>
         </div>
       </div>
 
@@ -170,12 +173,13 @@ export const LoginForm = ({ onSubmit, loading = false, error = null }) => {
       <div className="text-center">
         <p className="text-sm text-gray-600">
           Don't have an account?{' '}
-          <a
-            href="/register"
-            className="font-medium text-primary-600 hover:text-primary-500 focus:outline-none focus:underline"
+          <button
+            type="button"
+            onClick={() => navigate('/register')}
+            className="font-medium text-primary-600 hover:text-primary-500 focus:outline-none focus:underline bg-transparent border-none cursor-pointer"
           >
             Create one here
-          </a>
+          </button>
         </p>
       </div>
     </form>

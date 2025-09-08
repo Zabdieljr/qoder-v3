@@ -3,6 +3,7 @@ import { useForm } from 'react-hook-form'
 import { yupResolver } from '@hookform/resolvers/yup'
 import * as yup from 'yup'
 import { Eye, EyeOff, UserPlus, Loader2, Check, X } from 'lucide-react'
+import { useNavigate } from 'react-router-dom'
 
 // Validation schema
 const registerSchema = yup.object({
@@ -78,6 +79,7 @@ const PasswordStrength = ({ password }) => {
 export const RegisterForm = ({ onSubmit, loading = false, error = null }) => {
   const [showPassword, setShowPassword] = useState(false)
   const [showConfirmPassword, setShowConfirmPassword] = useState(false)
+  const navigate = useNavigate()
 
   const {
     register,
@@ -325,12 +327,13 @@ export const RegisterForm = ({ onSubmit, loading = false, error = null }) => {
       <div className="text-center">
         <p className="text-sm text-gray-600">
           Already have an account?{' '}
-          <a
-            href="/login"
-            className="font-medium text-primary-600 hover:text-primary-500 focus:outline-none focus:underline"
+          <button
+            type="button"
+            onClick={() => navigate('/login')}
+            className="font-medium text-primary-600 hover:text-primary-500 focus:outline-none focus:underline bg-transparent border-none cursor-pointer"
           >
             Sign in here
-          </a>
+          </button>
         </p>
       </div>
     </form>

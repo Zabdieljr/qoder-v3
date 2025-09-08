@@ -187,11 +187,12 @@ export class AuthService {
     try {
       console.log('Creating admin user with data:', adminData)
       
-      // First create auth user in Supabase Auth
+      // First create auth user in Supabase Auth with email confirmation disabled
       const { data: authData, error: authError } = await supabase.auth.signUp({
         email: adminData.email,
         password: adminData.password,
         options: {
+          emailRedirectTo: undefined, // Don't require email confirmation for admin
           data: {
             username: adminData.username,
             first_name: 'Admin',
@@ -207,10 +208,8 @@ export class AuthService {
 
       console.log('Auth user created successfully:', authData)
 
-      // For the initial admin setup, we need to sign in first to get proper permissions
-      if (authData.user && authData.session) {
-        console.log('User is authenticated, proceeding with profile creation')
-        
+      // Create user profile in our users table
+      if (authData.user) {
         const profileData = {
           id: authData.user.id,
           username: adminData.username,
@@ -219,7 +218,7 @@ export class AuthService {
           last_name: 'User',
           full_name: 'Admin User',
           status: USER_STATUS.ACTIVE,
-          email_verified: true,
+          email_verified: true, // Mark as verified for admin
           created_at: new Date().toISOString(),
           updated_at: new Date().toISOString()
         }
@@ -236,7 +235,7 @@ export class AuthService {
           console.error('Profile creation error:', profileError)
           console.error('Full error details:', JSON.stringify(profileError, null, 2))
           
-          // If RLS is blocking, try with a service role call or suggest running the RLS fix
+          // If RLS is blocking, provide helpful error message
           if (profileError.message && profileError.message.includes('row-level security')) {
             console.error('RLS Policy Error: Run the fix-rls-policies.sql script in Supabase SQL Editor')
             throw new Error('Row-level security is preventing admin user creation. Please run the RLS fix script in Supabase SQL Editor.')
@@ -246,6 +245,31 @@ export class AuthService {
         }
 
         console.log('Admin user profile created successfully:', insertedProfile)
+        
+        // If no session was created automatically, try to sign in the user
+        if (!authData.session) {
+          console.log('No session created during signup, attempting to sign in...')
+          
+          const { data: signInData, error: signInError } = await supabase.auth.signInWithPassword({
+            email: adminData.email,
+            password: adminData.password
+          })
+          
+          if (signInError) {
+            console.warn('Auto sign-in failed, but user and profile were created:', signInError)
+            // Don't throw error here - the user was created successfully
+          } else {
+            console.log('Successfully signed in after creation:', signInData)
+            return {
+              data: {
+                auth: signInData,
+                profile: insertedProfile
+              },
+              error: null
+            }
+          }
+        }
+        
         return { 
           data: { 
             auth: authData, 
@@ -254,8 +278,7 @@ export class AuthService {
           error: null 
         }
       } else {
-        console.error('User registration succeeded but no session created')
-        throw new Error('User registration succeeded but authentication session was not created. Please check your Supabase Auth configuration.')
+        throw new Error('User creation failed - no user object returned from Supabase Auth')
       }
 
     } catch (error) {

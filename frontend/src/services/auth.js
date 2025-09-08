@@ -185,6 +185,8 @@ export class AuthService {
   // Create Admin User (for initial setup)
   async createAdminUser(adminData) {
     try {
+      console.log('Creating admin user with data:', adminData)
+      
       // First create auth user
       const { data: authData, error: authError } = await supabase.auth.signUp({
         email: adminData.email,
@@ -198,30 +200,49 @@ export class AuthService {
         }
       })
 
-      if (authError) throw authError
+      if (authError) {
+        console.error('Auth signup error:', authError)
+        throw authError
+      }
 
-      // Create profile with admin privileges - using minimal required fields
+      console.log('Auth user created:', authData)
+
+      // Create profile with admin privileges - using only basic fields first
       if (authData.user) {
-        const { data: profileData, error: profileError } = await supabase
+        // Try with minimal fields first
+        const profileData = {
+          id: authData.user.id,
+          email: adminData.email,
+          username: adminData.username,
+          status: USER_STATUS.ACTIVE,
+          created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString()
+        }
+
+        // Add optional fields if they exist in the table
+        try {
+          profileData.first_name = 'Admin'
+          profileData.last_name = 'User'
+          profileData.full_name = 'Admin User'
+        } catch (e) {
+          console.warn('Optional fields not available, using minimal profile')
+        }
+
+        console.log('Attempting to insert profile:', profileData)
+
+        const { data: insertedProfile, error: profileError } = await supabase
           .from(TABLES.USERS)
-          .insert([
-            {
-              id: authData.user.id,
-              email: adminData.email,
-              username: adminData.username,
-              first_name: 'Admin',
-              last_name: 'User',
-              full_name: 'Admin User',
-              status: USER_STATUS.ACTIVE,
-              created_at: new Date().toISOString(),
-              updated_at: new Date().toISOString()
-            }
-          ])
+          .insert([profileData])
           .select()
           .single()
 
-        if (profileError) throw profileError
-        return { data: { auth: authData, profile: profileData }, error: null }
+        if (profileError) {
+          console.error('Profile creation error:', profileError)
+          throw profileError
+        }
+
+        console.log('Profile created successfully:', insertedProfile)
+        return { data: { auth: authData, profile: insertedProfile }, error: null }
       }
 
       return { data: authData, error: null }

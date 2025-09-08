@@ -134,6 +134,27 @@ export class AuthService {
   // Update User Profile
   async updateProfile(userId, updates) {
     try {
+      console.log('AuthService.updateProfile called with:')
+      console.log('- User ID:', userId)
+      console.log('- Updates:', updates)
+      
+      // First, check if the user exists
+      const { data: existingUser, error: checkError } = await supabase
+        .from(TABLES.USERS)
+        .select('id, username, email')
+        .eq('id', userId)
+        .single()
+      
+      if (checkError) {
+        console.error('User lookup error:', checkError)
+        if (checkError.code === 'PGRST116') {
+          throw new Error(`User with ID ${userId} not found in database`)
+        }
+        throw checkError
+      }
+      
+      console.log('Found existing user:', existingUser)
+      
       const { data, error } = await supabase
         .from(TABLES.USERS)
         .update({
@@ -144,10 +165,16 @@ export class AuthService {
         .select()
         .single()
 
-      if (error) throw error
+      if (error) {
+        console.error('Profile update error:', error)
+        throw error
+      }
+      
+      console.log('Profile update successful:', data)
       return { data, error: null }
     } catch (error) {
       console.error('Update profile error:', error)
+      console.error('Error details:', JSON.stringify(error, null, 2))
       return { data: null, error }
     }
   }

@@ -169,12 +169,20 @@ export const AuthProvider = ({ children }) => {
         throw new Error('No user logged in')
       }
       
-      const { data, error } = await authService.updateProfile(user.id, updates)
+      // Use the user ID from the profile or the auth user ID
+      const userId = user.profile?.id || user.id
+      console.log('Updating profile for user ID:', userId)
+      console.log('Updates:', updates)
+      
+      const { data, error } = await authService.updateProfile(userId, updates)
       
       if (error) {
+        console.error('Profile update error:', error)
         setError(error.message)
         return { success: false, error: error.message }
       }
+      
+      console.log('Profile updated successfully:', data)
       
       // Update local user state
       setUser(prevUser => ({
@@ -184,6 +192,7 @@ export const AuthProvider = ({ children }) => {
       
       return { success: true, data }
     } catch (err) {
+      console.error('Profile update exception:', err)
       const errorMessage = err.message || 'Profile update failed'
       setError(errorMessage)
       return { success: false, error: errorMessage }

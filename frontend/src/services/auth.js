@@ -207,8 +207,10 @@ export class AuthService {
 
       console.log('Auth user created successfully:', authData)
 
-      // Create user profile in our users table
-      if (authData.user) {
+      // For the initial admin setup, we need to sign in first to get proper permissions
+      if (authData.user && authData.session) {
+        console.log('User is authenticated, proceeding with profile creation')
+        
         const profileData = {
           id: authData.user.id,
           username: adminData.username,
@@ -233,6 +235,13 @@ export class AuthService {
         if (profileError) {
           console.error('Profile creation error:', profileError)
           console.error('Full error details:', JSON.stringify(profileError, null, 2))
+          
+          // If RLS is blocking, try with a service role call or suggest running the RLS fix
+          if (profileError.message && profileError.message.includes('row-level security')) {
+            console.error('RLS Policy Error: Run the fix-rls-policies.sql script in Supabase SQL Editor')
+            throw new Error('Row-level security is preventing admin user creation. Please run the RLS fix script in Supabase SQL Editor.')
+          }
+          
           throw profileError
         }
 
@@ -244,9 +253,11 @@ export class AuthService {
           }, 
           error: null 
         }
+      } else {
+        console.error('User registration succeeded but no session created')
+        throw new Error('User registration succeeded but authentication session was not created. Please check your Supabase Auth configuration.')
       }
 
-      return { data: authData, error: null }
     } catch (error) {
       console.error('Create admin user error:', error)
       console.error('Full error details:', JSON.stringify(error, null, 2))

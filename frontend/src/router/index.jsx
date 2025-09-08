@@ -1,5 +1,5 @@
 import React from 'react'
-import { createBrowserRouter, Navigate } from 'react-router-dom'
+import { createBrowserRouter, Navigate, useNavigate } from 'react-router-dom'
 import { PublicRoute, PrivateRoute, AdminRoute } from '../components/RouteGuards.jsx'
 
 // Import pages
@@ -59,20 +59,30 @@ const ResetPassword = () => (
 )
 
 // Simple test component to verify routing works
-const TestComponent = () => (
-  <div className="min-h-screen flex items-center justify-center bg-gray-50">
-    <div className="text-center">
-      <h1 className="text-3xl font-bold text-gray-900 mb-4">🎉 App is Working!</h1>
-      <p className="text-gray-600 mb-6">Routing is functional. Let's test login:</p>
-      <a
-        href="/login"
-        className="bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 inline-block"
-      >
-        Go to Login
-      </a>
+const TestComponent = () => {
+  const navigate = useNavigate()
+  
+  return (
+    <div className="min-h-screen flex items-center justify-center bg-gray-50">
+      <div className="text-center">
+        <h1 className="text-3xl font-bold text-gray-900 mb-4">🎉 App is Working!</h1>
+        <p className="text-gray-600 mb-6">Routing is functional. Let's test login:</p>
+        <button
+          onClick={() => navigate('/login')}
+          className="bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 inline-block mr-4"
+        >
+          Go to Login
+        </button>
+        <button
+          onClick={() => navigate('/register')}
+          className="bg-green-600 text-white px-6 py-3 rounded-lg hover:bg-green-700 inline-block"
+        >
+          Go to Register
+        </button>
+      </div>
     </div>
-  </div>
-)
+  )
+}
 
 // Create the router configuration
 export const router = createBrowserRouter([
@@ -82,33 +92,15 @@ export const router = createBrowserRouter([
   },
   {
     path: '/login',
-    element: <PublicRoute />,
-    children: [
-      {
-        index: true,
-        element: <LoginPage />
-      }
-    ]
+    element: <LoginPage />
   },
   {
     path: '/register',
-    element: <PublicRoute />,
-    children: [
-      {
-        index: true,
-        element: <RegisterPage />
-      }
-    ]
+    element: <RegisterPage />
   },
   {
     path: '/reset-password',
-    element: <PublicRoute />,
-    children: [
-      {
-        index: true,
-        element: <ResetPassword />
-      }
-    ]
+    element: <ResetPassword />
   },
   {
     path: '/dashboard',

@@ -11,7 +11,7 @@ import './index.css'
 const SHOW_DB_TEST = false
 
 // Temporary flag to disable admin setup check (for debugging)
-const SKIP_ADMIN_CHECK = true // Set to false when admin check is working
+const SKIP_ADMIN_CHECK = true // Temporarily skip admin check to focus on auth flow
 
 // App wrapper that handles admin setup
 const AppWrapper = () => {

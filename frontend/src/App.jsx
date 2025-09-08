@@ -4,7 +4,11 @@ import { AuthProvider } from './contexts/AuthContext.jsx'
 import { router } from './router/index.jsx'
 import ErrorBoundary from './components/ErrorBoundary.jsx'
 import AdminSetup, { useAdminSetup } from './components/AdminSetup.jsx'
+import DatabaseConnectionTest from './components/DatabaseConnectionTest.jsx'
 import './index.css'
+
+// Temporary flag to show database test
+const SHOW_DB_TEST = true
 
 // App wrapper that handles admin setup
 const AppWrapper = () => {
@@ -35,6 +39,19 @@ const AppWrapper = () => {
 }
 
 function App() {
+  // Show database connection test if enabled
+  if (SHOW_DB_TEST) {
+    return (
+      <ErrorBoundary>
+        <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4">
+          <div className="max-w-md w-full">
+            <DatabaseConnectionTest />
+          </div>
+        </div>
+      </ErrorBoundary>
+    )
+  }
+
   return (
     <ErrorBoundary>
       <AuthProvider>

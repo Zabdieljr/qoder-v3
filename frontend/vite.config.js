@@ -11,11 +11,25 @@ export default defineConfig({
   },
   build: {
     outDir: 'dist',
-    sourcemap: true
+    sourcemap: false,
+    target: 'es2020',
+    rollupOptions: {
+      output: {
+        manualChunks: {
+          vendor: ['react', 'react-dom'],
+          router: ['react-router-dom'],
+          forms: ['react-hook-form', 'yup'],
+          ui: ['lucide-react']
+        }
+      }
+    }
   },
   resolve: {
     alias: {
       '@': '/src'
     }
+  },
+  define: {
+    global: 'globalThis'
   }
 })

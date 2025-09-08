@@ -4,7 +4,11 @@ import { AuthProvider } from './contexts/AuthContext.jsx'
 import { router } from './router/index.jsx'
 import ErrorBoundary from './components/ErrorBoundary.jsx'
 import AdminSetup, { useAdminSetup } from './components/AdminSetup.jsx'
+import DiagnosticTest from './components/DiagnosticTest.jsx'
 import './index.css'
+
+// Temporary diagnostic mode - set to true to debug
+const DIAGNOSTIC_MODE = true
 
 // App wrapper that handles admin setup
 const AppWrapper = () => {
@@ -35,6 +39,15 @@ const AppWrapper = () => {
 }
 
 function App() {
+  // Show diagnostic test if enabled
+  if (DIAGNOSTIC_MODE) {
+    return (
+      <ErrorBoundary>
+        <DiagnosticTest />
+      </ErrorBoundary>
+    )
+  }
+
   return (
     <ErrorBoundary>
       <AuthProvider>
